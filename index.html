@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后会友期｜你的友情人格测试</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;font-family:"PingFang SC",Microsoft Yahei,sans-serif;}
+        body{background:#f7f3f0;color:#333;line-height:1.6;padding:16px;max-width:720px;margin:0 auto;}
+        .wrap{background:#fff;border-radius:16px;padding:24px;box-shadow:0 2px 12px #00000010;}
+        .cover-img{width:100%;border-radius:12px;margin-bottom:16px;object-fit:cover;}
+        h1{font-size:22px;text-align:center;margin-bottom:12px;color:#5a4844;}
+        .tip{font-size:14px;color:#777;text-align:center;margin-bottom:24px;}
+        .q-item{margin-bottom:22px;}
+        .q-title{font-size:16px;margin-bottom:10px;font-weight:500;}
+        .opt{display:block;padding:10px 14px;border:1px solid #ddd;border-radius:10px;margin-bottom:8px;cursor:pointer;transition:0.2s;}
+        .opt:hover{border-color:#b89b94;background:#fbf7f6;}
+        input[type=radio]{margin-right:8px;}
+        #submitBtn{width:100%;padding:14px;background:#8c6b64;color:#fff;border:none;border-radius:12px;font-size:17px;margin-top:16px;cursor:pointer;}
+        #resultBox{margin-top:24px;padding:20px;border-radius:14px;background:#f6efec;display:none;}
+        .res-name{font-size:20px;font-weight:bold;margin-bottom:10px;color:#704f48;}
+        .res-desc{font-size:15px;margin-bottom:8px;}
+        .res-tag{font-size:14px;color:#946c64;}
+        .reset-btn{margin-top:16px;padding:10px 16px;border-radius:8px;border:1px solid #8c6b64;background:#fff;color:#8c6b64;cursor:pointer;}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <!-- 封面图位置 -->
+    <img class="cover-img" src="cover.jpg" alt="后会友期">
+    <h1>后会友期｜你的友情人格测试</h1>
+    <div class="tip">成年人的友情，不是只有和好这一个答案。凭第一直觉选择，看看你是哪一位旧友。本测试仅供娱乐</div>
+    <div id="questionBox"></div>
+    <button id="submitBtn">查看我的友情人格</button>
+    <div id="resultBox">
+        <div class="res-name" id="resName"></div>
+        <div class="res-desc" id="resText"></div>
+        <div class="res-tag" id="resTag"></div>
+        <button class="reset-btn" onclick="location.reload()">重新测试</button>
+    </div>
+</div>
+
+<script>
+// 题目库，A厉娜 B许飞 C马天宇 D张萌 E白小纯 F王子璇
+const questionList = [
+    {q:"许久不联系的旧友发来消息，你第一反应？",opts:[
+        {txt:"立刻热情回复，主动开启话题",key:"lina"},
+        {txt:"先放一放，想清楚怎么回再说",key:"xufei"},
+        {txt:"简单礼貌回应，保持舒服距离",key:"matianyu"},
+        {txt:"认真斟酌措辞，照顾对方情绪",key:"zhangmeng"},
+        {txt:"随缘回复，想起再说，不勉强自己",key:"baixiaochun"},
+        {txt:"先安静看完，等对方把话说完再回应",key:"wangzixuan"}
+    ]},
+    {q:"得知多年未联系的旧友遇到了难关，你会？",opts:[
+        {txt:"主动发消息问候，能帮则帮",key:"lina"},
+        {txt:"纠结很久，最终还是不打扰对方",key:"xufei"},
+        {txt:"默默关注，不主动介入",key:"matianyu"},
+        {txt:"仔细打听情况，想办法给到合适帮助",key:"zhangmeng"},
+        {txt:"尊重对方选择，对方不说就不追问",key:"baixiaochun"},
+        {txt:"等对方主动开口求助，再做打算",key:"wangzixuan"}
+    ]},
+    {q:"和老朋友发生争吵、产生隔阂之后，你通常？",opts:[
+        {txt:"愿意主动破冰，把话说开",key:"lina"},
+        {txt:"心里反复回想，很难翻篇",key:"xufei"},
+        {txt:"先冷静一段时间，等情绪自然平复",key:"matianyu"},
+        {txt:"复盘矛盾，寻找双方都舒服的和解方式",key:"zhangmeng"},
+        {txt:"接受关系变淡，不强求修复",key:"baixiaochun"},
+        {txt:"先倾听对方想法，不急着争辩对错",key:"wangzixuan"}
+    ]},
+    {q:"朋友和你吐槽另一位共同好友，你会？",opts:[
+        {txt:"劝两个人好好沟通，化解误会",key:"lina"},
+        {txt:"默默记下，心里开始纠结为难",key:"xufei"},
+        {txt:"保持中立，不站队、不评价",key:"matianyu"},
+        {txt:"安抚情绪，引导对方理性看待",key:"zhangmeng"},
+        {txt:"听听就过，不掺和别人的矛盾",key:"baixiaochun"},
+        {txt:"先听完完整经过，再表达看法",key:"wangzixuan"}
+    ]},
+    {q:"很久没见的老友约你见面，你内心感受？",opts:[
+        {txt:"期待，提前准备好多话想聊",key:"lina"},
+        {txt:"紧张忐忑，担心气氛尴尬",key:"xufei"},
+        {txt:"平常心，见面舒服就好",key:"matianyu"},
+        {txt:"提前规划行程，想让这次见面圆满",key:"zhangmeng"},
+        {txt:"随缘，能见面很好，不去也没关系",key:"baixiaochun"},
+        {txt:"期待听对方讲讲最近的故事",key:"wangzixuan"}
+    ]},
+    {q:"一段友情慢慢变淡，你会？",opts:[
+        {txt:"不甘心，想要努力挽回",key:"lina"},
+        {txt:"反复怀念过去，很难释怀",key:"xufei"},
+        {txt:"坦然接受，尊重关系的变化",key:"matianyu"},
+        {txt:"回想过往，寻找是不是哪里出了问题",key:"zhangmeng"},
+        {txt:"顺其自然，缘分到这里就够了",key:"baixiaochun"},
+        {txt:"保留回忆，不强迫关系维持原样",key:"wangzixuan"}
+    ]},
+    {q:"朋友习惯性忽略你的感受，你会？",opts:[
+        {txt:"直接说出自己的委屈和不满",key:"lina"},
+        {txt:"憋在心里，独自内耗难过",key:"xufei"},
+        {txt:"悄悄拉开距离，减少期待",key:"matianyu"},
+        {txt:"委婉沟通，希望对方留意你的感受",key:"zhangmeng"},
+        {txt:"降低期待，不再投入太多情绪",key:"baixiaochun"},
+        {txt:"等合适时机，好好跟对方讲清楚",key:"wangzixuan"}
+    ]},
+    {q:"你更能接受哪种友情告别？",opts:[
+        {txt:"好好告别，当面说清楚",key:"lina"},
+        {txt:"没有告别，心里一直留遗憾",key:"xufei"},
+        {txt:"安静淡出，互不打扰",key:"matianyu"},
+        {txt:"体面收尾，留住彼此美好的回忆",key:"zhangmeng"},
+        {txt:"无声散场，接受聚散无常",key:"baixiaochun"},
+        {txt:"慢慢疏远，不撕破、不争吵",key:"wangzixuan"}
+    ]},
+    {q:"朋友做错事伤害到你，来找你道歉，你？",opts:[
+        {txt:"愿意给对方机会，选择和解",key:"lina"},
+        {txt:"心里过不去，很难真正原谅",key:"xufei"},
+        {txt:"可以释怀，但回不到从前",key:"matianyu"},
+        {txt:"看对方诚意，慢慢放下心结",key:"zhangmeng"},
+        {txt:"可以原谅，但不会再深交",key:"baixiaochun"},
+        {txt:"先听完对方的想法，再决定要不要原谅",key:"wangzixuan"}
+    ]},
+    {q:"你会主动翻看旧照片、怀念以前的友情吗？",opts:[
+        {txt:"经常会，怀念当初热闹的时光",key:"lina"},
+        {txt:"经常翻看，看完容易伤感",key:"xufei"},
+        {txt:"很少主动翻，偶然看到才想起",key:"matianyu"},
+        {txt:"会偶尔翻看，珍惜美好的片段",key:"zhangmeng"},
+        {txt:"很少回头看，更在意当下",key:"baixiaochun"},
+        {txt:"看到的时候会安静回想，不沉溺",key:"wangzixuan"}
+    ]},
+    {q:"朋友和你三观出现巨大分歧，你会？",opts:[
+        {txt:"大胆说出想法，和对方辩论沟通",key:"lina"},
+        {txt:"心里难受，不知道怎么面对",key:"xufei"},
+        {txt:"尊重差异，保持距离，求同存异",key:"matianyu"},
+        {txt:"尽量包容，避免冲突，照顾氛围",key:"zhangmeng"},
+        {txt:"道不同，慢慢减少来往",key:"baixiaochun"},
+        {txt:"认真听完对方观点，保留自己看法",key:"wangzixuan"}
+    ]},
+    {q:"你更倾向怎么维系友情？",opts:[
+        {txt:"高频聊天、主动分享日常",key:"lina"},
+        {txt:"默默放在心里，很少主动表达",key:"xufei"},
+        {txt:"舒服松弛，不用刻意联系",key:"matianyu"},
+        {txt:"记着对方喜好，用心记住重要节点",key:"zhangmeng"},
+        {txt:"不强维系，有缘自然亲近",key:"baixiaochun"},
+        {txt:"认真倾听，做靠谱的倾听者",key:"wangzixuan"}
+    ]},
+    {q:"老朋友有了新的圈子，不再常找你，你？",opts:[
+        {txt:"有点失落，主动找对方聊聊",key:"lina"},
+        {txt:"难过，会忍不住对比从前",key:"xufei"},
+        {txt:"理解，每个人都有自己新的生活",key:"matianyu"},
+        {txt:"祝福对方，也慢慢适应变化",key:"zhangmeng"},
+        {txt:"无所谓，各自奔赴就好",key:"baixiaochun"},
+        {txt:"尊重，不打扰对方新的生活",key:"wangzixuan"}
+    ]},
+    {q:"朋友想和你翻旧账，提起过去的矛盾，你？",opts:[
+        {txt:"愿意摊开来讲，一次性说开",key:"lina"},
+        {txt:"一提起旧账，情绪立刻翻涌上来",key:"xufei"},
+        {txt:"不想反复拉扯，希望向前看",key:"matianyu"},
+        {txt:"冷静梳理，一起把心结解开",key:"zhangmeng"},
+        {txt:"过去的事不想反复提起",key:"baixiaochun"},
+        {txt:"耐心听完，不急于争辩对错",key:"wangzixuan"}
+    ]},
+    {q:"如果友情里只有你一个人主动，你会？",opts:[
+        {txt:"继续主动一段时间，再看看变化",key:"lina"},
+        {txt:"不断怀疑自己，反复内耗",key:"xufei"},
+        {txt:"收回主动，不再单方面付出",key:"matianyu"},
+        {txt:"和对方沟通，说出你的疲惫",key:"zhangmeng"},
+        {txt:"及时止损，不再投入",key:"baixiaochun"},
+        {txt:"先观察一段时间，再做决定",key:"wangzixuan"}
+    ]},
+    {q:"朋友隐瞒事情、对你有所保留，你的感受？",opts:[
+        {txt:"会难过，希望对方坦诚相待",key:"lina"},
+        {txt:"胡思乱想，不断猜测原因",key:"xufei"},
+        {txt:"理解人都有秘密，不强求完全透明",key:"matianyu"},
+        {txt:"会失落，希望彼此之间多点信任",key:"zhangmeng"},
+        {txt:"尊重对方隐私，不追问",key:"baixiaochun"},
+        {txt:"等对方愿意说的时候再说",key:"wangzixuan"}
+    ]},
+    {q:"你愿意和旧友开启一场长途旅行吗？",opts:[
+        {txt:"很期待，想借着旅行修复关系",key:"lina"},
+        {txt:"既期待又害怕，怕暴露矛盾",key:"xufei"},
+        {txt:"可以一起，但需要保留独处空间",key:"matianyu"},
+        {txt:"期待，会好好规划旅途，珍惜相处",key:"zhangmeng"},
+        {txt:"随缘，合得来就一起，不舒服就分开",key:"baixiaochun"},
+        {txt:"愿意，慢慢相处，听彼此的故事",key:"wangzixuan"}
+    ]},
+    {q:"友情里你最害怕的是？",opts:[
+        {txt:"无话可说，慢慢疏远",key:"lina"},
+        {txt:"矛盾没有解开，留下永久遗憾",key:"xufei"},
+        {txt:"失去自我，为了朋友委屈自己",key:"matianyu"},
+        {txt:"因为误会，错过一段珍贵情谊",key:"zhangmeng"},
+        {txt:"关系捆绑，失去自由",key:"baixiaochun"},
+        {txt:"不被倾听，自己的想法不被看见",key:"wangzixuan"}
+    ]},
+    {q:"当朋友做了你不认同的选择，你？",opts:[
+        {txt:"直接说出你的看法，劝对方三思",key:"lina"},
+        {txt:"替对方担心，心里放不下",key:"xufei"},
+        {txt:"尊重选择，好坏让对方自己承担",key:"matianyu"},
+        {txt:"温和提醒，给到建议但不强迫",key:"zhangmeng"},
+        {txt:"尊重，不干涉别人的决定",key:"baixiaochun"},
+        {txt:"先听清楚他为什么这么选，再表达",key:"wangzixuan"}
+    ]},
+    {q:"你心中最好的友情结局是？",opts:[
+        {txt:"兜兜转转，最后依然和好相伴",key:"lina"},
+        {txt:"就算分开，也永远在心底珍藏",key:"xufei"},
+        {txt:"各自安好，有空见面，不见也安心",key:"matianyu"},
+        {txt:"体面温柔，留住所有温暖回忆",key:"zhangmeng"},
+        {txt:"聚散随缘，相遇过就足够",key:"baixiaochun"},
+        {txt:"好好告别，不留指责，只留回忆",key:"wangzixuan"}
+    ]}
+];
+
+// 角色结果库
+const resultMap = {
+    lina:{name:"厉娜｜开场递信人",text:"你愿意先发出那条消息。车站见面时，一句“路上顺利吗”，就能给两个人一个自然的开头。你愿意给旧友一个窗口，给彼此留出回答的时间，你递出的邀请，更容易让人接住。",tag:"标签：主动破冰、热烈真诚、愿意先迈出一步"},
+    xufei:{name:"许飞｜把心事困住的人",text:"你是会画地为牢的人。旧事在心里反复盘旋，很多没说出口的话，一直卡在原地。你很重感情，很难轻易和解，遗憾会在心底停留很久。",tag:"标签：敏感念旧、容易内耗、很难释怀"},
+    matianyu:{name:"马天宇｜留得出空隙的人",text:"你懂得同行不等于时时刻刻绑在一起。心里装不下的时候，你宁可自己安静一会儿，也不把气话说重；等情绪过去了，再自然地回到大家中间。你的体贴，是不追问、不勉强。",tag:"标签：边界感强、安静包容、优先照顾自己情绪"},
+    zhangmeng:{name:"张萌｜把细节装进行李",text:"你把安稳放在细节里。换好的前台、买齐的零食、提前捋顺的路线，你默默准备好一切。其实细腻温柔的偏心，藏在看不见的人手忙脚乱里。",tag:"标签：细心周全、擅长照顾人、重视仪式感"},
+    baixiaochun:{name:"白小纯｜约好下一场",text:"你认可分开的时刻，拥抱告别。你相信人生的一段同行，用完就翻篇。你愿意当下大方结束，不纠缠、不拉扯，能把一次重逢，慢慢长成放下一段关系。",tag:"标签：松弛通透、接纳散场、不强行挽留"},
+    wangzixuan:{name:"王子璇｜先听完再回应的人",text:"你习惯先听完全部对方的变化，没说完的话，你都愿意留给对方。心软的人总是多想，你的耐心，往往不知不觉就把心里话讲了出来，让你身边的人觉得安全感十足。",tag:"标签：擅长倾听、温和稳重、不急着表态"}
+};
+
+// 渲染题目
+const box = document.getElementById("questionBox");
+questionList.forEach((item,idx)=>{
+    let html = `<div class="q-item"><div class="q-title">${idx+1}. ${item.q}</div>`;
+    item.opts.forEach((opt,optIdx)=>{
+        html += `<label class="opt"><input type="radio" name="q${idx}" value="${opt.key}"> ${opt.txt}</label>`
+    })
+    html += `</div>`;
+    box.innerHTML += html;
+})
+
+// 提交计分
+document.getElementById("submitBtn").onclick = function(){
+    let score = {lina:0,xufei:0,matianyu:0,zhangmeng:0,baixiaochun:0,wangzixuan:0};
+    for(let i=0;i<questionList.length;i++){
+        let sel = document.querySelector(`input[name="q${i}"]:checked`);
+        if(!sel){alert("请答完所有题目！");return;}
+        score[sel.value] +=1;
+    }
+    // 找最高分
+    let maxKey = Object.keys(score).sort((a,b)=>score[b]-score[a])[0];
+    let res = resultMap[maxKey];
+    document.getElementById("resName").innerText = res.name;
+    document.getElementById("resText").innerText = res.text;
+    document.getElementById("resTag").innerText = res.tag;
+    document.getElementById("resultBox").style.display="block";
+    document.getElementById("resultBox").scrollIntoView({behavior:"smooth"});
+}
+</script>
+</body>
+</html>
